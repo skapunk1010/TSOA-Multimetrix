@@ -1,9 +1,6 @@
 package Application;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
+import gnu.io.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
@@ -88,49 +85,51 @@ public class Arduino implements SerialPortEventListener {
     private static final int DATA_RATE = 115200;
 
     public Arduino() {
-        connect();
+        //connect();
     }
 
-    public synchronized void connect() {
+    public synchronized void connect(String portName) throws Exception,NoSuchPortException {
+        CommPortIdentifier portId = searchPort(portName);
+        if (portId == null) {
+            System.out.println("Could not find COM port.");
+            throw new NoSuchPortException();
+        }
+
+        // open serial port, and use class name for the appName.
+        this.serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+
+        // set port parameters
+        this.serialPort.setSerialPortParams(DATA_RATE,
+                SerialPort.DATABITS_8,
+                SerialPort.STOPBITS_1,
+                SerialPort.PARITY_NONE);
+
+        // open the streams
+        input = new BufferedReader(new InputStreamReader(this.serialPort.getInputStream()));
+
+        // add event listeners
+        serialPort.addEventListener(this);
+        serialPort.notifyOnDataAvailable(true);
+        System.out.println("Arduino Done!");
+        
+    }
+        
+    
+    private synchronized CommPortIdentifier searchPort(String portName){
         CommPortIdentifier portId = null;
         portsOfComputer = CommPortIdentifier.getPortIdentifiers();
+        this.portsOfComputer = CommPortIdentifier.getPortIdentifiers();
         serialPort = null;
 
         //First, Find an instance of serial port as set in PORT_NAMES.
         while (portsOfComputer.hasMoreElements()) {
             CommPortIdentifier currPortId = (CommPortIdentifier) portsOfComputer.nextElement();
-            for (String portName : PORT_NAMES) {
-                if (currPortId.getName().equals(portName)) {
-                    portId = currPortId;
-                    break;
-                }
+            if (currPortId.getName().equals(portName)) {
+                portId = currPortId;
+                break;
             }
         }
-        if (portId == null) {
-            System.out.println("Could not find COM port.");
-            return;
-        }
-
-        try {
-            // open serial port, and use class name for the appName.
-            this.serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-
-            // set port parameters
-            this.serialPort.setSerialPortParams(DATA_RATE,
-                    SerialPort.DATABITS_8,
-                    SerialPort.STOPBITS_1,
-                    SerialPort.PARITY_NONE);
-
-            // open the streams
-            input = new BufferedReader(new InputStreamReader(this.serialPort.getInputStream()));
-
-            // add event listeners
-            serialPort.addEventListener(this);
-            serialPort.notifyOnDataAvailable(true);
-            System.out.println("Arduino Done!");
-        } catch (Exception e) {
-            System.err.println("Excepción initilize=" + e.toString());
-        }
+        return portId;
     }
 
     /**
@@ -152,38 +151,21 @@ public class Arduino implements SerialPortEventListener {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
-                /*
-                 * this.receivedData = true; this.lastECGValue = new Double(inputLine).doubleValue();
-                 */
-//                System.out.println("Value: " + inputLine);
+                 this.receivedData = true;
                 if (inputLine.startsWith("S")) {
                     this.lastECGValue = new Double(inputLine.substring(1)).doubleValue();
-                    this.dataset.getSeries(0).add(new Millisecond(), lastECGValue);
+                }else if(inputLine.startsWith("B")){
+                    this.lastBPMValue = new Double(inputLine.substring(1)).doubleValue();
+                }else if(inputLine.startsWith("T")){
+                    this.lastThermometerValue = new Double(inputLine.substring(1)).doubleValue();
                 }
                 this.receivedData = false;
-                //                String[] data = inputLine.split(",");
-                //                if(data.length == 3){
-                //                    /*Retrived the ECC value*/
-                //                    this.lastECGValue = (data[ECC_VALUE] == null || data[ECC_VALUE].isEmpty()) ? 0.0 : new Double(data[ECC_VALUE]).doubleValue();
-                ////                    System.out.print("ECG Value : "+this.lastECGValue);
-                //
-                //                    /*Retrived the Thermometer value*/
-                //                    this.lastThermometerValue = (data[THERMOMETER_VALUE] == null || data[THERMOMETER_VALUE].isEmpty())? 0.0 : new Double(data[THERMOMETER_VALUE]).doubleValue();
-                ////                    System.out.println("  Thermometer Value : "+this.lastThermometerValue);
-                //
-                //                    /*Retrived the Oximeter value*/
-                //                    this.lastOximeterValue = (data[OXIMETER_VALUE] == null || data[OXIMETER_VALUE].isEmpty()) ? 0.0 : new Double(data[OXIMETER_VALUE]).doubleValue();
-                ////                    System.out.println("Oximeter Value : "+lastOximeterValue);
-                ////                    System.out.println();
-                //                }
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (Exception e) {
                 System.err.println("Excepción serialEvent=" + e.toString());
-                //this.receivedData = false;
+                this.receivedData = false;
             }
-        } else { // Ignore all the other eventTypes, but you should consider the other ones.
-            this.receivedData = false;
-        }
+        }// Ignore all the other eventTypes, but you should consider the other ones.
     }
     /**
      * 
@@ -208,6 +190,10 @@ public class Arduino implements SerialPortEventListener {
 
     public double getLastThermometerValue() {
         return lastThermometerValue;
+    }
+    
+    public double getLastBPMValue(){
+        return lastBPMValue;
     }
 
     public BufferedReader getInput() {

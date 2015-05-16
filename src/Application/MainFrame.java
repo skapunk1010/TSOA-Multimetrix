@@ -1,5 +1,6 @@
 package Application;
 
+import gnu.io.NoSuchPortException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.logging.Level;
@@ -28,10 +29,28 @@ public class MainFrame extends JFrame {
         new Thread(new Runnable(){
             @Override
             public void run() {
+                
                 while(true){
                     try {
                         chart.addData(arduino.getLastECGValue());
-                        Thread.sleep(1);
+                        Thread.sleep(20);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start();
+        
+        new Thread(new Runnable(){
+
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        lblBpm.setText(Double.toString(arduino.getLastBPMValue()));
+                        lblTermometro.setText(Double.toString(arduino.getLastThermometerValue()));
+                        System.out.println(arduino.getLastThermometerValue());
+                        Thread.sleep(100);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -87,13 +106,13 @@ public class MainFrame extends JFrame {
         );
         panelGraficaECGLayout.setVerticalGroup(
             panelGraficaECGLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 552, Short.MAX_VALUE)
+            .add(0, 0, Short.MAX_VALUE)
         );
 
         panelBpm.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         panelBpm.setPreferredSize(new java.awt.Dimension(145, 200));
 
-        lblBpm.setFont(new java.awt.Font("Digital-7", 0, 90)); // NOI18N
+        lblBpm.setFont(new java.awt.Font("Digital-7", 0, 40)); // NOI18N
         lblBpm.setForeground(new java.awt.Color(255, 0, 0));
         lblBpm.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblBpm.setText("90");
@@ -112,13 +131,13 @@ public class MainFrame extends JFrame {
             .add(panelBpmLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(lblBpm, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 124, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
 
         panelTermometro.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         panelTermometro.setPreferredSize(new java.awt.Dimension(145, 200));
 
-        lblTermometro.setFont(new java.awt.Font("Digital-7", 0, 90)); // NOI18N
+        lblTermometro.setFont(new java.awt.Font("Digital-7", 0, 40)); // NOI18N
         lblTermometro.setForeground(new java.awt.Color(255, 0, 0));
         lblTermometro.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblTermometro.setText("90");
@@ -137,7 +156,7 @@ public class MainFrame extends JFrame {
             .add(panelTermometroLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(lblTermometro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 121, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(51, Short.MAX_VALUE))
         );
 
         panelOximetro.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -162,7 +181,7 @@ public class MainFrame extends JFrame {
             .add(panelOximetroLayout.createSequentialGroup()
                 .add(14, 14, 14)
                 .add(lblOximetro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 126, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
 
         cboPorts.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -204,7 +223,7 @@ public class MainFrame extends JFrame {
                         .add(btnDisconnect)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                         .add(cboPorts, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 229, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(lblStatusPort, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 260, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
         );
@@ -216,12 +235,12 @@ public class MainFrame extends JFrame {
                     .add(layout.createSequentialGroup()
                         .add(panelBpm, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(panelTermometro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
+                        .add(panelTermometro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
                         .add(18, 18, 18)
                         .add(panelOximetro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
                         .add(5, 5, 5))
                     .add(layout.createSequentialGroup()
-                        .add(panelGraficaECG, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
+                        .add(panelGraficaECG, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(cboPorts, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -241,8 +260,19 @@ public class MainFrame extends JFrame {
 
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
         // TODO add your handling code here:
-        if(!arduino.isConnected()){
-            arduino.connect();
+        if(cboPorts.getSelectedIndex() != 0 &&!arduino.isConnected()){
+            String portSelected = (String)cboPorts.getSelectedItem();
+            try {    
+                arduino.connect(portSelected);
+                lblStatusPort.setText("Arduino Connected Succesfully on port "+portSelected);
+                lblStatusPort.setForeground(Color.BLACK);
+            }catch(NoSuchPortException ex){
+                
+            } catch (Exception e) {
+                System.err.println("Excepción initilize=" + e.toString());
+                lblStatusPort.setText("Can't connect to arduino on port "+portSelected);
+                lblStatusPort.setForeground(Color.RED);
+            }
         }else{
             
         }
@@ -252,6 +282,7 @@ public class MainFrame extends JFrame {
         // TODO add your handling code here:
         if(arduino.isConnected()){
             arduino.close();
+            lblStatusPort.setText("No se ha conectado ningún dispositivo");
         }
     }//GEN-LAST:event_btnDisconnectActionPerformed
 

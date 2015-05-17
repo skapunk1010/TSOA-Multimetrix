@@ -160,9 +160,14 @@ public class Arduino implements SerialPortEventListener {
                     this.lastThermometerValue = new Double(inputLine.substring(1)).doubleValue();
                 }
                 this.receivedData = false;
-                Thread.sleep(100);
+                Thread.sleep(1);
+            } catch(NumberFormatException ex) {
+                this.lastECGValue = 0.0;
+                this.lastBPMValue = 0.0;
+                this.lastThermometerValue = 0.0;
+                System.err.println("NumberFormatException: " + ex.getMessage());
             } catch (Exception e) {
-                System.err.println("Excepción serialEvent=" + e.toString());
+                System.err.println("Excepción serialEvent = " + e.toString());
                 this.receivedData = false;
             }
         }// Ignore all the other eventTypes, but you should consider the other ones.

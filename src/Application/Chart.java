@@ -66,15 +66,14 @@ public class Chart {
     public Chart() {
         
         this.plot       = new CombinedDomainXYPlot(new DateAxis());
-        this.series     = new TimeSeries("", Millisecond.class); //   Nombre eje X, tipo de dato
+        this.series     = new TimeSeries("Tiempo( ms )", Millisecond.class); //   Nombre eje X, tipo de dato
         this.dataset    = new TimeSeriesCollection(series);
         
         this.rangeYAxis = new NumberAxis("Valor del sensor de pulso");
-        rangeYAxis.setAutoRangeIncludesZero(true);
-        rangeYAxis.setRangeWithMargins(-1.0, 1030.0);//
+        rangeYAxis.setAutoRangeIncludesZero(false);
         rangeYAxis.setAutoRange(false);//
-        rangeYAxis.setRange(new Range(-1.0,800.0));
-        rangeYAxis.setTickLabelPaint(Color.WHITE);       
+        rangeYAxis.setRange(new Range(200.0,600.0));
+        rangeYAxis.setTickLabelPaint(Color.WHITE);
         
         this.subplot = new XYPlot(this.dataset, null, rangeYAxis, new StandardXYItemRenderer());
         subplot.setBackgroundPaint(new Color(0,40,32)); ///
@@ -95,8 +94,8 @@ public class Chart {
         
         this.axis = plot.getDomainAxis();
         axis.setAutoRange(false);
-        axis.setFixedAutoRange(10000.0);  // 10 seconds
-        axis.setTickLabelsVisible(false);
+        axis.setFixedAutoRange(10000.0);  // 10 seconds 
+        axis.setTickLabelsVisible(true);
         axis.setTickLabelPaint(Color.WHITE);
         
         
@@ -141,5 +140,9 @@ public class Chart {
     public void addData(double value){
         this.lastValue = value;
         this.dataset.getSeries(0).add(new Millisecond(), value);
+    }
+    
+    public void setRange(int time){
+        axis.setFixedAutoRange(time * 1000.0);
     }
 }
